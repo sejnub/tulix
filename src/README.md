@@ -3,6 +3,12 @@
 
 ## Infos
 
+### Links
+
+- <https://stackoverflow.com/questions/5618988/regular-expression-parsing-a-binary-file>
+- <http://code.activestate.com/recipes/181065-parsing-binary-files-with-regular-expressions/>
+
+
 ### Where are the chrome bookmarks
 
 Whatever your reason for needing the location of the bookmarks files, before you modify them or delete them, you must exit Google Chrome. Otherwise, Chrome may detect a change to the files and automatically restore them. Whether you have a Windows, Mac or Linux operating system, you can find your Google Chrome bookmark files just by following a few simple steps. Here is how to get started.
