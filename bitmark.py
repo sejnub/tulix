@@ -3,7 +3,6 @@ import html
 import re
 
 
-
 ###############
 ## constants ##
 ###############
@@ -62,7 +61,6 @@ class Entry():
 
     def __str__(self):
         return(self.f_v_listen_port + ' | ' + self.f_v_comment)
-
 
 
 def pf_match(match_object):
@@ -288,7 +286,6 @@ def match_level_5(entry, holder):
     value = 'L5: Ended successfully'
     print( OK, value)
     return(OK, value)
-
 
 
 ##########
