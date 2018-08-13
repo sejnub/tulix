@@ -27,40 +27,92 @@ NOMATCH     = 'did_not_match'
 ###############
 
 class Holder:
-    tunnels_all            = []
-    tunnels_browser_local  = []
-    tunnels_browser_remote = []
+    tunnels_all                    = []
     
     matchlevel_1_outer             = 0
     matchlevel_2_inner             = 0
     matchlevel_3_inner_convertable = 0
     matchlevel_4_inner_field_sizes = 0
 
+    # Returns all link_entries
+    def get_links(self, local_or_remote):
+        pass
+
     def str_tunnels_all(self):
         ret_value = ''
-        for entry in self.tunnels_all:
-            ret_value += str(entry) + '\n'
+        for tunnel in self.tunnels_all:
+            ret_value += str(tunnel) + '\n'
         return(ret_value)
+
+    def html_test_tunnels_all(self, local:bool):
+        ret_value = ''
+        for tunnel in self.tunnels_all:
+            ret_value += tunnel.get_html(local) + '\n'
+        return(ret_value)
+
 
     def write_html(self, out_file):
         out_str = pprint.pformat(self)
         out_file.write(out_str)
 
 
-class Entry():
+class Tunnel():
     f_s_listen_if   = 0            
     f_s_listen_port = 0            
     f_s_dest_host   = 0          
     f_s_dest_port   = 0          
     f_s_comment     = 0        
+
     f_v_listen_if   = ''          
-    f_v_listen_port = ''            
+    f_v_listen_port = 0            
     f_v_dest_host   = ''          
-    f_v_dest_port   = ''          
+    f_v_dest_port   = 0          
     f_v_comment     = ''        
 
     def __str__(self):
-        return(self.f_v_listen_port + ' | ' + self.f_v_comment)
+        return(str(self.f_v_listen_port) + ' | ' + self.f_v_comment)
+
+    def get_html(self, local:bool):
+        return(
+            self.get_link(local).get_html()
+        )
+
+    def get_link(self, local:bool):
+
+        def local_link(self):
+            return(Link(
+                i_host    = self.f_v_listen_if, 
+                i_port    = self.f_v_listen_port, 
+                i_comment = self.f_v_comment)
+            )
+
+        def remote_link(self):
+            return(Link(
+                i_host    = self.f_v_dest_host, 
+                i_port    = self.f_v_dest_port, 
+                i_comment = self.f_v_comment)
+            )
+
+        return local_link(self) if local else remote_link(self)
+
+
+class Link:
+    host    = ''      
+    port    = 0
+    comment = ''      
+    # TODO: See if there is a shorter syntax to set these values
+    def __init__(self, i_host='', i_port=0, i_comment=''):
+        self.host    = i_host
+        self.port    = i_port
+        self.comment = i_comment
+
+    def get_html(self):
+        #       <a href="https://www.w3schools.com">Visit W3Schools</a>
+        html = '<a href="http://{host}:{port}">{comment}</a>'.format(
+            host    = self.host,
+            port    = self.port,
+            comment = self.comment
+        )    
 
 
 def pf_match(match_object):
@@ -69,7 +121,7 @@ def pf_match(match_object):
             "\n"                      + 
             "match_object: {pretty}"  +
             "\n"                      +
-            "entry:        '{group}'" +
+            "tunnel:        '{group}'" +
             "\n"                      +
             "span_hex:     ({start_hex}, {end_hex}), length_of_match: {length}\n" 
 
@@ -110,7 +162,7 @@ def match_level_0(input_fn, output_fn):
     print("matchlevel_4: " + str(holder.matchlevel_4_inner_field_sizes))
     print()
     print('Found the following entries:')
-    pprint.pprint(holder.str_tunnels_all())
+    pprint.pprint(holder.html_test_tunnels_all(local=True))
 
     try:
         with open(output_fn, "w") as out_file:
@@ -144,11 +196,11 @@ def match_level_1(in_bytes, holder):
     print(match_info)
 
     if match_info == NOMATCH:
-        reason = 'L1: No more entry found'
+        reason = 'L1: No more tunnel found'
         print( ERROR, reason)
         return(ERROR, reason)
 
-    value = 'L1: An entry was found'
+    value = 'L1: A tunnel was found'
     print( OK, value)
 
     holder.matchlevel_1_outer += 1
@@ -166,7 +218,7 @@ def match_level_2(matched_group, holder):
     match_info = pf_match(m)
 
     if match_info == NOMATCH:
-        reason = 'L2: Entry does not have 5 fields'
+        reason = 'L2: Tunnel does not have 5 fields'
         print( ERROR, reason)
         return(ERROR, reason)
 
@@ -239,25 +291,26 @@ def match_level_4(size_1, field_1, size_2, field_2, size_3, field_3, size_4, fie
     # f_s : field size
     # f_v : field value
 
-    entry = Entry()
-
-    entry.f_s_listen_if   = size_1
-    entry.f_v_listen_if   = field_1
-    entry.f_s_listen_port = size_2
-    entry.f_v_listen_port = field_2
-    entry.f_s_dest_host   = size_3
-    entry.f_v_dest_host   = field_3
-    entry.f_s_dest_port   = size_4
-    entry.f_v_dest_port   = field_4
-    entry.f_s_comment     = size_5
-    entry.f_v_comment     = field_5
-
     try:
+        tunnel = Tunnel()
+        tunnel.f_s_listen_if   = size_1
+        tunnel.f_v_listen_if   = field_1
+        tunnel.f_s_listen_port = size_2
+        tunnel.f_v_listen_port = int(field_2)
+        tunnel.f_s_dest_host   = size_3
+        tunnel.f_v_dest_host   = field_3
+        tunnel.f_s_dest_port   = size_4
+        tunnel.f_v_dest_port   = int(field_4)
+        tunnel.f_s_comment     = size_5
+        tunnel.f_v_comment     = field_5
+
         if (
-            entry.f_s_listen_if   < 3 or
-            entry.f_s_listen_port < 1 or
-            entry.f_s_dest_host   < 3 or
-            entry.f_s_dest_port   < 1
+            tunnel.f_s_listen_if   < 3 or
+            tunnel.f_s_listen_port < 1 or
+            tunnel.f_s_listen_port > 6 or
+            tunnel.f_s_dest_host   < 3 or
+            tunnel.f_s_dest_port   < 1 or
+            tunnel.f_s_dest_port   > 6
         ):
             reason = 'L4: Field sizes are not plausible'
             print( ERROR, reason)
@@ -271,14 +324,14 @@ def match_level_4(size_1, field_1, size_2, field_2, size_3, field_3, size_4, fie
         print(ERROR, reason)
         return(ERROR, reason)
 
-    match_level_5(entry, holder)
+    match_level_5(tunnel, holder)
 
     return(OK, value)
 
 
-def match_level_5(entry, holder):
-    holder.tunnels_all.append(entry)
-    value = 'L5: Entry was added to holder.tunnels_all'
+def match_level_5(tunnel, holder):
+    holder.tunnels_all.append(tunnel)
+    value = 'L5: Tunnel was added to holder.tunnels_all'
     print( OK, value)
 
     # WIP:
