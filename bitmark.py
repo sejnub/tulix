@@ -371,7 +371,10 @@ def fn_to_tlp(input_fn):
         print( ERROR, reason)
         return(ERROR, reason)
 
-    print('\n################################')
+    print()
+    print()
+    print('################################')
+    print('################################')
     value = 'L0: File read worked'
     print( OK, value)
 
