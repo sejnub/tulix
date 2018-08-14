@@ -1,21 +1,45 @@
 import pprint
 import html
 import re
-
+import os
+import fnmatch
+import textwrap
 
 ###############
 ## constants ##
 ###############
 
-CURRENT_DIR = '<to be implemented>'
-INPUT_FN    = 'src/kopie_von_t59_####_hunte37_via_raspi-docker-02.tlp'
-OUTPUT_FN   = 'out.html'
+START_FOLDER  = 'D:/hb-privat/reps/bitvise_to_bookmark'
+OUTPUT_FN     = 'out.html'
 
-OK          = 'ok'
-ERROR       = 'error'
-MATCH       = 'did_match'
-NOMATCH     = 'did_not_match'
+COMMENT_MATCH_HTTPS = r"HTTPS"
+COMMENT_MATCH_HTTP  = r"HTTP"
 
+OK            = 'ok'
+ERROR         = 'error'
+MATCH         = 'did_match'
+NOMATCH       = 'did_not_match'
+
+HTML_TITLE    = 'Tunnel Links'
+# See http://htmlshell.com/
+HTML_SKELETON = textwrap.dedent("""\
+    <!doctype html>
+    <html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>{title}</title>
+    </head>
+
+    <body>
+        {body}
+    </body>
+
+    </html>
+""")
 
 #############
 ## helpers ##
@@ -26,13 +50,16 @@ NOMATCH     = 'did_not_match'
 ## functions ##
 ###############
 
-class Holder:
+class Tlp:
     tunnels_all                    = []
-    
+
     matchlevel_1_outer             = 0
     matchlevel_2_inner             = 0
     matchlevel_3_inner_convertable = 0
     matchlevel_4_inner_field_sizes = 0
+
+    fn_full_path                   = ''
+    fn_stripped                    = ''
 
     # Returns all link_entries
     def get_links(self, local_or_remote):
@@ -47,7 +74,7 @@ class Holder:
     def html_test_tunnels_all(self, local:bool):
         ret_value = ''
         for tunnel in self.tunnels_all:
-            ret_value += tunnel.get_html(local) + '\n'
+            ret_value += tunnel.get_html(local) + '<br/>\n'
         return(ret_value)
 
 
@@ -57,17 +84,17 @@ class Holder:
 
 
 class Tunnel():
-    f_s_listen_if   = 0            
-    f_s_listen_port = 0            
-    f_s_dest_host   = 0          
-    f_s_dest_port   = 0          
-    f_s_comment     = 0        
+    f_s_listen_if   = 0
+    f_s_listen_port = 0
+    f_s_dest_host   = 0
+    f_s_dest_port   = 0
+    f_s_comment     = 0
 
-    f_v_listen_if   = ''          
-    f_v_listen_port = 0            
-    f_v_dest_host   = ''          
-    f_v_dest_port   = 0          
-    f_v_comment     = ''        
+    f_v_listen_if   = ''
+    f_v_listen_port = 0
+    f_v_dest_host   = ''
+    f_v_dest_port   = 0
+    f_v_comment     = ''
 
     def __str__(self):
         return(str(self.f_v_listen_port) + ' | ' + self.f_v_comment)
@@ -79,17 +106,17 @@ class Tunnel():
 
     def get_link(self, local:bool):
 
-        def local_link(self):
+        def remote_link(self):
             return(Link(
-                i_host    = self.f_v_listen_if, 
-                i_port    = self.f_v_listen_port, 
+                i_host    = self.f_v_listen_if,
+                i_port    = self.f_v_listen_port,
                 i_comment = self.f_v_comment)
             )
 
-        def remote_link(self):
+        def local_link(self):
             return(Link(
-                i_host    = self.f_v_dest_host, 
-                i_port    = self.f_v_dest_port, 
+                i_host    = self.f_v_dest_host,
+                i_port    = self.f_v_dest_port,
                 i_comment = self.f_v_comment)
             )
 
@@ -97,9 +124,9 @@ class Tunnel():
 
 
 class Link:
-    host    = ''      
+    host    = ''
     port    = 0
-    comment = ''      
+    comment = ''
     # TODO: See if there is a shorter syntax to set these values
     def __init__(self, i_host='', i_port=0, i_comment=''):
         self.host    = i_host
@@ -107,24 +134,23 @@ class Link:
         self.comment = i_comment
 
     def get_html(self):
-        #       <a href="https://www.w3schools.com">Visit W3Schools</a>
         html = '<a href="http://{host}:{port}">{comment}</a>'.format(
             host    = self.host,
             port    = self.port,
             comment = self.comment
-        )    
+        )
+        return(html)
 
 
 def pf_match(match_object):
     try:
         match_info = ((
-            "\n"                      + 
+            "\n"                      +
             "match_object: {pretty}"  +
             "\n"                      +
-            "tunnel:        '{group}'" +
+            "tunnel:       '{group}'" +
             "\n"                      +
-            "span_hex:     ({start_hex}, {end_hex}), length_of_match: {length}\n" 
-
+            "span_hex:     ({start_hex}, {end_hex}), length_of_match: {length}\n" +
             '').format(
                 pretty    = pprint.pformat(match_object),
                 start_hex = hex(match_object.span()[0]),
@@ -138,101 +164,81 @@ def pf_match(match_object):
     return(match_info)
 
 
-def match_level_0(input_fn, output_fn):
+def find_files(pattern, path):
+    result = []
+    for root, _, files in os.walk(path):
+        print('# ' + root)
+        for name in files:
+            if fnmatch.fnmatch(name, pattern):
+                result.append(os.path.join(root, name))
+    return result
+
+
+def match_level_5(tunnel, tlp):
+
+    re_https = re.compile(COMMENT_MATCH_HTTPS)
+    re_http  = re.compile(COMMENT_MATCH_HTTP)
+    
+    m_https = re_https.search(tunnel.f_v_comment)
+    m_http  = re_http.search( tunnel.f_v_comment)
+
+    if m_https != None or m_http != None:
+        tlp.tunnels_all.append(tunnel)
+        value = 'L5: Tunnel was added to tlp.tunnels_all'
+        print( OK, value)
+    else: 
+        value = 'L5: Tunnel was not added because of missing hint for HTTP(S) in the comment.'
+        print( OK, value)
+
+    value = 'L5: Ended successfully'
+    print( OK, value)
+    return(OK, value)
+
+
+def match_level_4(size_1, field_1, size_2, field_2, size_3, field_3, size_4, field_4, size_5, field_5, tlp):
+
+    # f_s : field size
+    # f_v : field value
 
     try:
-        with open(input_fn, "rb") as in_file:
-            in_bytes = in_file.read()
+        tunnel = Tunnel()
+        tunnel.f_s_listen_if   = size_1
+        tunnel.f_v_listen_if   = field_1
+        tunnel.f_s_listen_port = size_2
+        tunnel.f_v_listen_port = int(field_2)
+        tunnel.f_s_dest_host   = size_3
+        tunnel.f_v_dest_host   = field_3
+        tunnel.f_s_dest_port   = size_4
+        tunnel.f_v_dest_port   = int(field_4)
+        tunnel.f_s_comment     = size_5
+        tunnel.f_v_comment     = field_5
+
+        if (
+            tunnel.f_s_listen_if   < 3 or
+            tunnel.f_s_listen_port < 1 or
+            tunnel.f_s_listen_port > 6 or
+            tunnel.f_s_dest_host   < 3 or
+            tunnel.f_s_dest_port   < 1 or
+            tunnel.f_s_dest_port   > 6
+        ):
+            reason = 'L4: Field sizes are not plausible'
+            print( ERROR, reason)
+            return(ERROR, reason)
+        else:
+            tlp.matchlevel_4_inner_field_sizes += 1
+            value = 'L4: All fields sizes are plausible'
+            print( OK, value)
     except:
-        reason = 'L0: File read failed'
-        print( ERROR, reason)
+        reason = 'L4: Exception was raised'
+        print(ERROR, reason)
         return(ERROR, reason)
 
-    value = 'L0: File read worked'
-    print( OK, value)
-
-    holder = Holder()
-    match_level_1(in_bytes, holder)
-
-    print()
-    print()
-    print("matchlevel_1: " + str(holder.matchlevel_1_outer))
-    print("matchlevel_2: " + str(holder.matchlevel_2_inner))
-    print("matchlevel_3: " + str(holder.matchlevel_3_inner_convertable))
-    print("matchlevel_4: " + str(holder.matchlevel_4_inner_field_sizes))
-    print()
-    print('Found the following entries:')
-    pprint.pprint(holder.html_test_tunnels_all(local=True))
-
-    try:
-        with open(output_fn, "w") as out_file:
-            holder.write_html(out_file)
-    except:
-        reason = 'L0: File write failed'
-        print( ERROR, reason)
-        return(ERROR, reason)
-
-    value = 'L0: File write worked'
-    print( OK, value)
-
-    ret_value = None
-
-    value = 'L0: Everything worked'
-    print( OK, value)
-    return(OK, value)
-
-
-def match_level_1(in_bytes, holder):
-
-    print()
-    print('################ match_level_1')
-    print("Number of bytes to parse: {n}".format(n=len(in_bytes)))
-
-    #p2 = re.compile(b'\01\00\00\00(.*?)((\01\00\00\00)|(\00\00\00\00\00\00\00\00\00))')
-    #p2 = re.compile(b'\01\00\00\00(.*?)\01\00\00\00')
-    p2 = re.compile(b'\01\00\00\00(.*?)((\01\00\00\00)|(\00\00\00\00\00\00\00\00\00))')
-    m = p2.search(in_bytes)
-    match_info = pf_match(m)
-    print(match_info)
-
-    if match_info == NOMATCH:
-        reason = 'L1: No more tunnel found'
-        print( ERROR, reason)
-        return(ERROR, reason)
-
-    value = 'L1: A tunnel was found'
-    print( OK, value)
-
-    holder.matchlevel_1_outer += 1
-    match_level_2(m.group(1), holder)
-
-    match_level_1(in_bytes[m.span()[1]-5:], holder)
+    match_level_5(tunnel, tlp)
 
     return(OK, value)
 
 
-def match_level_2(matched_group, holder):
-
-    p2 = re.compile(b'(.)([^\00]*)\00\00\00(.)([^\00]*)\00\00\00(.)([^\00]*)\00\00\00(.)([^\00]*)\00\00\00(.)([^\00]*)$')
-    m = p2.search(matched_group)
-    match_info = pf_match(m)
-
-    if match_info == NOMATCH:
-        reason = 'L2: Tunnel does not have 5 fields'
-        print( ERROR, reason)
-        return(ERROR, reason)
-
-    value = 'L2: Five fields were found'
-    print( OK, value)
-
-    holder.matchlevel_2_inner += 1
-
-    match_level_3(m = m, holder = holder)
-
-    return(OK, value)
-
-
-def match_level_3(m, holder):
+def match_level_3(m, tlp):
 
     try:
         size_1  = int.from_bytes(m.group(1), 'little')
@@ -267,7 +273,7 @@ def match_level_3(m, holder):
     )
     print(groups_str)
 
-    holder.matchlevel_3_inner_convertable += 1
+    tlp.matchlevel_3_inner_convertable += 1
 
     match_level_4(
         size_1  = size_1,
@@ -280,65 +286,163 @@ def match_level_3(m, holder):
         field_4 = field_4,
         size_5  = size_5,
         field_5 = field_5,
-        holder  = holder
+        tlp  = tlp
     )
 
     return(OK, value)
 
 
-def match_level_4(size_1, field_1, size_2, field_2, size_3, field_3, size_4, field_4, size_5, field_5, holder):
+def match_level_2(matched_group, tlp):
 
-    # f_s : field size
-    # f_v : field value
+    p2 = re.compile(b'(.)([^\00]*)\00\00\00(.)([^\00]*)\00\00\00(.)([^\00]*)\00\00\00(.)([^\00]*)\00\00\00(.)([^\00]*)$')
+    m = p2.search(matched_group)
+    match_info = pf_match(m)
 
-    try:
-        tunnel = Tunnel()
-        tunnel.f_s_listen_if   = size_1
-        tunnel.f_v_listen_if   = field_1
-        tunnel.f_s_listen_port = size_2
-        tunnel.f_v_listen_port = int(field_2)
-        tunnel.f_s_dest_host   = size_3
-        tunnel.f_v_dest_host   = field_3
-        tunnel.f_s_dest_port   = size_4
-        tunnel.f_v_dest_port   = int(field_4)
-        tunnel.f_s_comment     = size_5
-        tunnel.f_v_comment     = field_5
-
-        if (
-            tunnel.f_s_listen_if   < 3 or
-            tunnel.f_s_listen_port < 1 or
-            tunnel.f_s_listen_port > 6 or
-            tunnel.f_s_dest_host   < 3 or
-            tunnel.f_s_dest_port   < 1 or
-            tunnel.f_s_dest_port   > 6
-        ):
-            reason = 'L4: Field sizes are not plausible'
-            print( ERROR, reason)
-            return(ERROR, reason)
-        else:
-            holder.matchlevel_4_inner_field_sizes += 1
-            value = 'L4: All fields sizes are plausible'
-            print( OK, value)
-    except:
-        reason = 'L4: Exception was raised'
-        print(ERROR, reason)
+    if match_info == NOMATCH:
+        reason = 'L2: Tunnel does not have 5 fields'
+        print( ERROR, reason)
         return(ERROR, reason)
 
-    match_level_5(tunnel, holder)
+    value = 'L2: Five fields were found'
+    print( OK, value)
+
+    tlp.matchlevel_2_inner += 1
+
+    match_level_3(m = m, tlp = tlp)
 
     return(OK, value)
 
 
-def match_level_5(tunnel, holder):
-    holder.tunnels_all.append(tunnel)
-    value = 'L5: Tunnel was added to holder.tunnels_all'
+def match_level_1(in_bytes, tlp):
+
+    print()
+    print('################ match_level_1')
+    print("Number of bytes to parse: {n}".format(n=len(in_bytes)))
+
+    #p2 = re.compile(b'\01\00\00\00(.*?)((\01\00\00\00)|(\00\00\00\00\00\00\00\00\00))')
+    #p2 = re.compile(b'\01\00\00\00(.*?)\01\00\00\00')
+    p2 = re.compile(b'\01\00\00\00(.*?)((\01\00\00\00)|(\00\00\00\00\00\00\00\00\00))')
+    m = p2.search(in_bytes)
+    match_info = pf_match(m)
+    #print(match_info)
+
+    if match_info == NOMATCH:
+        reason = 'L1: No more tunnel found'
+        print( ERROR, reason)
+        return(ERROR, reason)
+
+    value = 'L1: A tunnel was found'
     print( OK, value)
 
-    # WIP:
+    tlp.matchlevel_1_outer += 1
+    match_level_2(m.group(1), tlp)
 
-    value = 'L5: Ended successfully'
-    print( OK, value)
+    match_level_1(in_bytes[m.span()[1]-5:], tlp)
+
     return(OK, value)
+
+
+def fn_to_tlp(input_fn):
+
+    try:
+        with open(input_fn, "rb") as in_file:
+            in_bytes = in_file.read()
+    except:
+        reason = 'L0: File read failed'
+        print( ERROR, reason)
+        return(ERROR, reason)
+
+    value = 'L0: File read worked'
+    print( OK, value)
+
+    tlp = Tlp()
+
+    #p2 = re.compile(b'\01\00\00\00(.*?)((\01\00\00\00)|(\00\00\00\00\00\00\00\00\00))')
+    #m = p2.search(in_bytes)
+    try:
+        m = re.search(r"([^/]*)\.tlp$", input_fn)
+        tlp.fn_stripped  = m.group(1)
+        tlp.fn_full_path = input_fn
+    except:
+        reason = 'L0: Filename extraction failed'
+        print( ERROR, reason)
+        return(ERROR, reason)
+
+    match_level_1(in_bytes, tlp)
+
+    print()
+    print()
+    print("matchlevel_1: " + str(tlp.matchlevel_1_outer))
+    print("matchlevel_2: " + str(tlp.matchlevel_2_inner))
+    print("matchlevel_3: " + str(tlp.matchlevel_3_inner_convertable))
+    print("matchlevel_4: " + str(tlp.matchlevel_4_inner_field_sizes))
+    print()
+    print('Found the following entries:')
+    print("Stripped fn: '{}'\nFull fn:     '{}'".format(tlp.fn_stripped, tlp.fn_full_path))
+    pprint.pprint(tlp.html_test_tunnels_all(local=True))
+
+    # TODO: Add logger module
+    value = 'L0: File write worked'
+    print( OK, value)
+
+    value = 'L0: Everything worked'
+    print( OK, value)
+    return(OK, tlp)
+
+
+def get_all_tlp(start_folder):
+
+    tlp_fns = find_files('*.tlp', start_folder)
+    pprint.pprint(tlp_fns)
+
+    list_of_tlps = []
+    for fn in tlp_fns:
+        _, tlp = fn_to_tlp(fn)
+        list_of_tlps.append(tlp)
+        pass
+
+    return(OK, list_of_tlps)
+
+
+def get_html(start_folder):
+    
+    _, tlps = get_all_tlp(start_folder)
+
+    
+    body = ''
+    for tlp in tlps:
+        # TODO: make concatenations more efficient
+        body += "<h2>{tlp_name}</h2>\n".format(tlp_name=tlp.fn_stripped)
+        body += "<h3>Local</h3>\n"
+        body += tlp.html_test_tunnels_all(local=True)
+        body += "<h3>Remote</h3>\n"
+        body += tlp.html_test_tunnels_all(local=False)
+
+
+    title = HTML_TITLE
+    html = HTML_SKELETON.format(title=title, body=body)
+    return(OK, html)
+
+
+def html_to_file(start_folder, output_fn):
+    _, html = get_html(start_folder)
+
+    try:
+       with open(output_fn, "w") as out_file:
+           out_file.write(html)
+    except: # TODO: In all except clauses: Only catch the relevant exceptions!
+       reason = 'get_html: File write failed'
+       print( ERROR, reason)
+       return(ERROR, reason)
+
+    value = 'html is written to file'
+    print(OK, value)
+
+    return(OK, value)
+
+def all():
+    html_to_file(START_FOLDER, OUTPUT_FN)
+
 
 
 ##########
@@ -347,4 +451,7 @@ def match_level_5(tunnel, holder):
 
 if __name__ == '__main__':
     print('p2')
-    match_level_0(INPUT_FN, OUTPUT_FN)
+    all()
+
+
+# eof
