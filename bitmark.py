@@ -5,16 +5,22 @@ import os
 import fnmatch
 import textwrap
 
+# TODO: Check which tlp files are opened and only process those tlp files!
+# TODO: Open a browser with the produced link file!
+
+
 ###############
 ## constants ##
 ###############
 
 START_FOLDER  = 'D:/hb-privat/reps/bitvise_to_bookmark'
-OUTPUT_FN     = 'out.html'
+START_FOLDER  = 'C:/hb-regime/3_configuration/remote-access'
 
-COMMENT_MATCH_HTTPS = r"HTTPS"
-COMMENT_MATCH_HTTP  = r"HTTP"
+OUTPUT_FN     = 'bitmark.html'
 
+RE_HTTPS = re.compile(r"HTTPS")
+RE_HTTP  = re.compile(r"HTTP")
+    
 OK            = 'ok'
 ERROR         = 'error'
 MATCH         = 'did_match'
@@ -45,6 +51,27 @@ HTML_SKELETON = textwrap.dedent("""\
 ## helpers ##
 #############
 
+def indicates_https(comment):
+    m = RE_HTTPS.search(comment)
+    return(False if m == None else True)
+
+def indicates_http(comment):
+    if indicates_https(comment):
+        return(False)
+    else:
+        m = RE_HTTP.search(comment)
+        if m == None:
+            return(False)
+        else:
+            return(True)
+
+def indicates_http_or_https(comment):
+    m = RE_HTTP.search(comment)
+    if m == None:
+        return(False)
+    else:
+        return(True)
+    
 
 ###############
 ## functions ##
@@ -61,26 +88,11 @@ class Tlp:
     fn_full_path                   = ''
     fn_stripped                    = ''
 
-    # Returns all link_entries
-    def get_links(self, local_or_remote):
-        pass
-
-    def str_tunnels_all(self):
-        ret_value = ''
-        for tunnel in self.tunnels_all:
-            ret_value += str(tunnel) + '\n'
-        return(ret_value)
-
     def html_test_tunnels_all(self, local:bool):
         ret_value = ''
         for tunnel in self.tunnels_all:
             ret_value += tunnel.get_html(local) + '<br/>\n'
         return(ret_value)
-
-
-    def write_html(self, out_file):
-        out_str = pprint.pformat(self)
-        out_file.write(out_str)
 
 
 class Tunnel():
@@ -107,8 +119,10 @@ class Tunnel():
     def get_link(self, local:bool):
 
         def remote_link(self):
+            # TODO: This is probably only necessary because of a routing error concerning 127.0.0.1
+            host = "localhost" if self.f_v_listen_if == "127.0.0.1" else self.f_v_listen_if
             return(Link(
-                i_host    = self.f_v_listen_if,
+                i_host    = host,
                 i_port    = self.f_v_listen_port,
                 i_comment = self.f_v_comment)
             )
@@ -124,20 +138,30 @@ class Tunnel():
 
 
 class Link:
-    host    = ''
-    port    = 0
-    comment = ''
+    protocol = ''
+    host     = ''
+    port     = 0
+    comment  = ''
+
     # TODO: See if there is a shorter syntax to set these values
     def __init__(self, i_host='', i_port=0, i_comment=''):
+        if indicates_https(i_comment):
+            # TODO: Are these self. correct or do they point to the class
+            self.protocol = 'https'
+        elif indicates_http(i_comment):
+            self.protocol = 'http'
+        else:
+            self.protocol = 'other_protocol'
         self.host    = i_host
         self.port    = i_port
         self.comment = i_comment
 
     def get_html(self):
-        html = '<a href="http://{host}:{port}">{comment}</a>'.format(
-            host    = self.host,
-            port    = self.port,
-            comment = self.comment
+        html = '<a href="{protocol}://{host}:{port}">{comment}</a>'.format(
+            protocol = self.protocol,
+            host     = self.host,
+            port     = self.port,
+            comment  = self.comment
         )
         return(html)
 
@@ -174,15 +198,9 @@ def find_files(pattern, path):
     return result
 
 
-def match_level_5(tunnel, tlp):
+def match_level_5_contains_http(tunnel, tlp):
 
-    re_https = re.compile(COMMENT_MATCH_HTTPS)
-    re_http  = re.compile(COMMENT_MATCH_HTTP)
-    
-    m_https = re_https.search(tunnel.f_v_comment)
-    m_http  = re_http.search( tunnel.f_v_comment)
-
-    if m_https != None or m_http != None:
+    if indicates_http_or_https(tunnel.f_v_comment):
         tlp.tunnels_all.append(tunnel)
         value = 'L5: Tunnel was added to tlp.tunnels_all'
         print( OK, value)
@@ -212,6 +230,7 @@ def match_level_4(size_1, field_1, size_2, field_2, size_3, field_3, size_4, fie
         tunnel.f_v_dest_port   = int(field_4)
         tunnel.f_s_comment     = size_5
         tunnel.f_v_comment     = field_5
+        print('\np1 Comment:', tunnel.f_v_comment, '\n')
 
         if (
             tunnel.f_s_listen_if   < 3 or
@@ -233,7 +252,7 @@ def match_level_4(size_1, field_1, size_2, field_2, size_3, field_3, size_4, fie
         print(ERROR, reason)
         return(ERROR, reason)
 
-    match_level_5(tunnel, tlp)
+    match_level_5_contains_http(tunnel, tlp)
 
     return(OK, value)
 
@@ -352,6 +371,7 @@ def fn_to_tlp(input_fn):
         print( ERROR, reason)
         return(ERROR, reason)
 
+    print('\n################################')
     value = 'L0: File read worked'
     print( OK, value)
 
@@ -407,7 +427,6 @@ def get_all_tlp(start_folder):
 def get_html(start_folder):
     
     _, tlps = get_all_tlp(start_folder)
-
     
     body = ''
     for tlp in tlps:
@@ -417,7 +436,6 @@ def get_html(start_folder):
         body += tlp.html_test_tunnels_all(local=True)
         body += "<h3>Remote</h3>\n"
         body += tlp.html_test_tunnels_all(local=False)
-
 
     title = HTML_TITLE
     html = HTML_SKELETON.format(title=title, body=body)
