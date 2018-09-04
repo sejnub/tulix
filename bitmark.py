@@ -78,35 +78,39 @@ def indicates_http_or_https(comment):
 ###############
 
 class Tlp:
-    tunnels_all                    = []
 
-    matchlevel_1_outer             = 0
-    matchlevel_2_inner             = 0
-    matchlevel_3_inner_convertable = 0
-    matchlevel_4_inner_field_sizes = 0
+    def __init__(self) -> None:
+        self.tunnels_all = []
 
-    fn_full_path                   = ''
-    fn_stripped                    = ''
+        self.matchlevel_1_outer = 0
+        self.matchlevel_2_inner = 0
+        self.matchlevel_3_inner_convertable = 0
+        self.matchlevel_4_inner_field_sizes = 0
 
-    def html_test_tunnels_all(self, local:bool):
+        self.fn_full_path = ''
+        self.fn_stripped = ''
+
+    def html_test_tunnels_all(self, local: bool):
         ret_value = ''
         for tunnel in self.tunnels_all:
-            ret_value += tunnel.get_html(local) + '<br/>\n'
-        return(ret_value)
+            ret_value += tunnel.get_html(local) + '<br/>/n'
+        return (ret_value)
 
 
-class Tunnel():
-    f_s_listen_if   = 0
-    f_s_listen_port = 0
-    f_s_dest_host   = 0
-    f_s_dest_port   = 0
-    f_s_comment     = 0
+class Tunnel:
 
-    f_v_listen_if   = ''
-    f_v_listen_port = 0
-    f_v_dest_host   = ''
-    f_v_dest_port   = 0
-    f_v_comment     = ''
+    def __init__(self) -> None:
+        self.f_s_listen_if = 0
+        self.f_s_listen_port = 0
+        self.f_s_dest_host = 0
+        self.f_s_dest_port = 0
+        self.f_s_comment = 0
+
+        self.f_v_listen_if = ''
+        self.f_v_listen_port = 0
+        self.f_v_dest_host = ''
+        self.f_v_dest_port = 0
+        self.f_v_comment = ''
 
     def __str__(self):
         return(str(self.f_v_listen_port) + ' | ' + self.f_v_comment)
@@ -138,10 +142,6 @@ class Tunnel():
 
 
 class Link:
-    protocol = ''
-    host     = ''
-    port     = 0
-    comment  = ''
 
     # TODO: See if there is a shorter syntax to set these values
     def __init__(self, i_host='', i_port=0, i_comment=''):
