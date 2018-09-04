@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RDCMan programVersion="2.7" schemaVersion="3">
+  <file>
+    <credentialsProfiles>
+      <credentialsProfile inherit="None">
+        <profileName scope="Local">hbunjes nas2 nq..</profileName>
+        <userName>hbunjes</userName>
+        <password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAuNdajlmgx0SOYGQS22o3SwAAAAACAAAAAAADZgAAwAAAABAAAAA0+Ip26bI5Z4HLaMtQhfc2AAAAAASAAACgAAAAEAAAANJXU9bis0UDeL41BxZzFMQYAAAAW+5lWqeIo/BxthIuTQx5Cee+kH4iYKeNFAAAAOtgLo62sgu2rGVFqG67kSY3YrN+</password>
+        <domain />
+      </credentialsProfile>
+      <credentialsProfile inherit="None">
+        <profileName scope="Local">BTCDS\hebunjes</profileName>
+        <userName>BTCDS\hebunjes</userName>
+        <password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAuNdajlmgx0SOYGQS22o3SwAAAAACAAAAAAADZgAAwAAAABAAAADXitbdYi8NQkGIbqqyECVJAAAAAASAAACgAAAAEAAAAGsBB1X5cnJNg6j4tGbCInYYAAAAfQc3uVvPfA7nDW/32KCzFEYszdpttnkgFAAAAO4cTRymT5tLNoxqCPMjh8CYkdRs</password>
+        <domain>BTCDS</domain>
+      </credentialsProfile>
+      <credentialsProfile inherit="None">
+        <profileName scope="Local">int\hebunjes</profileName>
+        <userName>int\hebunjes</userName>
+        <password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAuNdajlmgx0SOYGQS22o3SwAAAAACAAAAAAADZgAAwAAAABAAAAB+lVtLET87wDwA8+oYwRsSAAAAAASAAACgAAAAEAAAAKCF5m5nmQzd8SieVg8tvLMYAAAAMC8277uf94P24prUEtwFaJ/Upkbioq2bFAAAAHLArRaab8A9VfjI7ED/qWF/NaYT</password>
+        <domain>int</domain>
+      </credentialsProfile>
+      <credentialsProfile inherit="None">
+        <profileName scope="Local">INT\naemken</profileName>
+        <userName>naemken</userName>
+        <password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAuNdajlmgx0SOYGQS22o3SwAAAAACAAAAAAADZgAAwAAAABAAAABthwa3X1Jw0hCo6lCHlVnCAAAAAASAAACgAAAAEAAAAEFGdKJQ23igJh8s1iZUPJEYAAAARE72dVbzHNrSgPUWZaN9vD7CakT59uA9FAAAAIPBekZ/4S3C5ST0X14ktvw9MdKf</password>
+        <domain>INT</domain>
+      </credentialsProfile>
+      <credentialsProfile inherit="None">
+        <profileName scope="Local">BTCNET\hebunjes</profileName>
+        <userName>hebunjes</userName>
+        <password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAuNdajlmgx0SOYGQS22o3SwAAAAACAAAAAAADZgAAwAAAABAAAACchP8kAUnictYGRVboo5RtAAAAAASAAACgAAAAEAAAAEjEYFrImOHq+Mv59G97PiYYAAAA/5LCk5pY6LjqZNTf+/WlOO9b09+FVYhcFAAAADLI07XYNAROs9RjduDGpp1lehvK</password>
+        <domain>BTCNET</domain>
+      </credentialsProfile>
+    </credentialsProfiles>
+    <properties>
+      <expanded>True</expanded>
+      <name>All</name>
+    </properties>
+    <group>
+      <properties>
+        <expanded>True</expanded>
+        <name>btcds</name>
+      </properties>
+      <server>
+        <properties>
+          <displayName>grid agent</displayName>
+          <name>10.160.172.68</name>
+          <comment>Win Server 2016</comment>
+        </properties>
+      </server>
+      <server>
+        <properties>
+          <displayName>VPP06 (10.160.173.98)</displayName>
+          <name>10.160.173.98</name>
+        </properties>
+        <logonCredentials inherit="None">
+          <profileName scope="File">BTCDS\hebunjes</profileName>
+        </logonCredentials>
+      </server>
+    </group>
+    <group>
+      <properties>
+        <expanded>True</expanded>
+        <name>enera-entw</name>
+      </properties>
+      <server>
+        <properties>
+          <name>10.170.232.21</name>
+        </properties>
+      </server>
+      <server>
+        <properties>
+          <displayName>INT\ hebunjes at 10.170.232.13_universal-messaging</displayName>
+          <name>10.170.232.13</name>
+        </properties>
+        <logonCredentials inherit="None">
+          <profileName scope="Local">Custom</profileName>
+          <userName>hebunjes</userName>
+          <password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAuNdajlmgx0SOYGQS22o3SwAAAAACAAAAAAADZgAAwAAAABAAAACJiPKB4MsbmOMglGqnfU3dAAAAAASAAACgAAAAEAAAACT7Fo1iJECO9fGAwacWEdoYAAAAoT8iwZjTTfsfvxrJiVTErWsK0/qwyYPOFAAAAHH2Il4XYyK3D8kVd5xzUk/jupEb</password>
+          <domain>INT</domain>
+        </logonCredentials>
+      </server>
+      <server>
+        <properties>
+          <displayName>INT\hebunjes auf 10.170.232.14</displayName>
+          <name>10.170.232.14</name>
+        </properties>
+        <logonCredentials inherit="None">
+          <profileName scope="Local">Custom</profileName>
+          <userName>INT\hebunjes</userName>
+          <password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAuNdajlmgx0SOYGQS22o3SwAAAAACAAAAAAADZgAAwAAAABAAAAArsQc4ANLtzYB0pKTkz6UxAAAAAASAAACgAAAAEAAAAJa0KvXm81UT0c7FzOBQwwQYAAAAl4A/3js9w5DEjbMbZKXbXblkdI6J/QX4FAAAAAwMpSil+EaAUnwrsE2mDZg4iC/R</password>
+          <domain>INT</domain>
+        </logonCredentials>
+      </server>
+      <server>
+        <properties>
+          <displayName>NAEMKEN at 10.170.232.13 universal messaging</displayName>
+          <name>10.170.232.13</name>
+        </properties>
+        <logonCredentials inherit="None">
+          <profileName scope="File">INT\naemken</profileName>
+        </logonCredentials>
+      </server>
+      <server>
+        <properties>
+          <displayName>sdsp / universal messaging</displayName>
+          <name>10.170.232.26</name>
+        </properties>
+        <logonCredentials inherit="None">
+          <profileName scope="Local">Custom</profileName>
+          <userName>hebunjes</userName>
+          <password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAuNdajlmgx0SOYGQS22o3SwAAAAACAAAAAAADZgAAwAAAABAAAACa/1JzsNDlLm81Ik528Y6dAAAAAASAAACgAAAAEAAAAPj08Tt67iegtWrZa6ruPJEYAAAAVC5k9y9zRyoENyU+nW126fS4zosRRDlOFAAAALoOANUBJ++VxzS32xu850VwTsLR</password>
+          <domain>int</domain>
+        </logonCredentials>
+      </server>
+    </group>
+    <group>
+      <properties>
+        <expanded>True</expanded>
+        <name>hunte37</name>
+      </properties>
+      <group>
+        <properties>
+          <expanded>True</expanded>
+          <name>tunneled through rpi-02</name>
+        </properties>
+        <server>
+          <properties>
+            <displayName>nasX win7ent-32bit</displayName>
+            <name>localhost:59122</name>
+          </properties>
+          <logonCredentials inherit="None">
+            <profileName scope="File">hbunjes nas2 nq..</profileName>
+          </logonCredentials>
+        </server>
+        <server>
+          <properties>
+            <displayName>pc-01-schwarz</displayName>
+            <name>localhost:59128</name>
+          </properties>
+          <logonCredentials inherit="None">
+            <profileName scope="Local">Custom</profileName>
+            <userName />
+            <password />
+            <domain />
+          </logonCredentials>
+        </server>
+        <server>
+          <properties>
+            <displayName>win10-debrid</displayName>
+            <name>localhost:59103</name>
+          </properties>
+        </server>
+      </group>
+    </group>
+    <group>
+      <properties>
+        <expanded>True</expanded>
+        <name>Kollegen</name>
+      </properties>
+      <server>
+        <properties>
+          <displayName>Jannis Oeltjen</displayName>
+          <name>oldn92151</name>
+        </properties>
+        <logonCredentials inherit="None">
+          <profileName scope="Local">Custom</profileName>
+          <userName>jnoeltje</userName>
+          <password />
+          <domain>BTCNET</domain>
+        </logonCredentials>
+      </server>
+    </group>
+  </file>
+  <connected />
+  <favorites />
+  <recentlyUsed />
+</RDCMan>

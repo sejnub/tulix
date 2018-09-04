@@ -93,7 +93,7 @@ class Tlp:
     def html_test_tunnels_all(self, local: bool):
         ret_value = ''
         for tunnel in self.tunnels_all:
-            ret_value += tunnel.get_html(local) + '<br/>/n'
+            ret_value += tunnel.get_html(local) + '<br/>\n'
         return (ret_value)
 
 
@@ -434,11 +434,17 @@ def get_html(start_folder):
     body = ''
     for tlp in tlps:
         # TODO: make concatenations more efficient
-        body += "<h2>{tlp_name}</h2>\n".format(tlp_name=tlp.fn_stripped)
-        body += "<h3>Local</h3>\n"
-        body += tlp.html_test_tunnels_all(local=True)
-        body += "<h3>Remote</h3>\n"
-        body += tlp.html_test_tunnels_all(local=False)
+        local_tunnels_html  = tlp.html_test_tunnels_all(local=True)
+        remote_tunnels_html = tlp.html_test_tunnels_all(local=False)
+
+        if local_tunnels_html != '' or remote_tunnels_html != '':
+            body += "<h2>{tlp_name}</h2>\n".format(tlp_name=tlp.fn_stripped)
+        if local_tunnels_html != '':
+            body += "<h3>Local</h3>\n"
+            body += local_tunnels_html
+        if local_tunnels_html != '':
+            body += "<h3>Remote</h3>\n"
+            body += remote_tunnels_html
 
     title = HTML_TITLE
     html = HTML_SKELETON.format(title=title, body=body)
