@@ -20,8 +20,8 @@ START_FOLDER  = '.'
 
 OUTPUT_FN     = 'bitmark.html'
 
-RE_HTTPS = re.compile(r"HTTPS")
-RE_HTTP  = re.compile(r"HTTP")
+RE_HTTPS = re.compile(r"(HTTPS)|(https)")
+RE_HTTP  = re.compile(r"(HTTP)|(http)")
     
 OK            = 'ok'
 ERROR         = 'error'
