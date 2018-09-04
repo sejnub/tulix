@@ -15,6 +15,8 @@ import textwrap
 
 START_FOLDER  = 'D:/hb-privat/reps/bitvise_to_bookmark'
 START_FOLDER  = 'C:/hb-regime/3_configuration/remote-access'
+START_FOLDER  = '.'
+
 
 OUTPUT_FN     = 'bitmark.html'
 
