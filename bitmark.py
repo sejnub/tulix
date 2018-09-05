@@ -144,7 +144,8 @@ class Tunnel:
 
 
 class Link:
-
+    # TODO: Set URL path to the <value> of 'path=<value>' in the comment. 
+    #       Comment example: "Livetracer path=livetracer-ui HTTP" 
     # TODO: See if there is a shorter syntax to set these values
     def __init__(self, i_host='', i_port=0, i_comment=''):
         if indicates_https(i_comment):
