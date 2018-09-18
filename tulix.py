@@ -18,7 +18,7 @@ START_FOLDER  = 'C:/hb-regime/3_configuration/remote-access'
 START_FOLDER  = '.'
 
 
-OUTPUT_FN     = 'bitmark.html'
+OUTPUT_FN     = 'tulix.html'
 
 RE_HTTPS = re.compile(r"(HTTPS)|(https)")
 RE_HTTP  = re.compile(r"(HTTP)|(http)")

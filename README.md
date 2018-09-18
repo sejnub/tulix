@@ -1,6 +1,8 @@
-# Bitmark
+# Tulix
 
-Bitmark is a small python script that generates an html page with links that it extracts from the tunnel information in ```tlp``` (Bitvise SSH Client configuration) files.
+```tulix``` is short for 'TUnnel LInk eXtractor'.
+
+```tulix``` is a small python script that generates an html page with links that it extracts from the tunnel information in ```tlp``` (Bitvise SSH Client configuration) files.
 
 ## What is it
 
@@ -8,12 +10,12 @@ Bitmark is a small python script that generates an html page with links that it 
 
 The [Bitvise SSH Client](https://www.bitvise.com/ssh-client) ([downloadlink](https://www.bitvise.com/ssh-client-download)) is started with a configuration file (that has a name ending on ```.tlp```). The configuration file contains the definition of a list of ssh tunnels (port forwardings) that are established along with the ssh connection.
 
-### What does bitmark do
+### What does tulix do
 
-bitmark starts in the current working directory and recursively searches all folders for ```tlp``` files.
-It extracts the tunnel definitions from those files and generates the file ```bitmark.html``` which it puts into the current working directory.
+tulix starts in the current working directory and recursively searches all folders for ```tlp``` files.
+It extracts the tunnel definitions from those files and generates the file ```tulix.html``` which it puts into the current working directory.
 
-```bitmark.html``` contains links to the local forwarded ports and to the remote targets of those ports.
+```tulix.html``` contains links to the local forwarded ports and to the remote targets of those ports.
 
 The following rules are applied:
 
@@ -24,15 +26,15 @@ The following rules are applied:
 
 ### Call interpreter
 
-```python bitmark.py```
+```python tulix.py```
 
 ### Call executable (Windows)
 
 - Create an executable with PyInstaller (documented later)
 - Put the executable in a folder that is in the 'path' variable
-- Go to the folder where the ```bitmark.html``` file shall be put.
+- Go to the folder where the ```tulix.html``` file shall be put.
 - Open a command prompt
-- Execute ```bitmark```
+- Execute ```tulix```
 
 ## Create an executable with PyInstaller
 
@@ -42,7 +44,7 @@ Run ```pip install PyInstaller```
 
 ### Run PyInstaller
 
-Run ```pyinstaller --onefile bitmark.py```
+Run ```pyinstaller --onefile tulix.py```
 
 ### Get the exe file
 
@@ -50,10 +52,10 @@ The exe is to be found in the ```dist``` folder.
 
 ## Code quality and status
 
-For me bitmark does it's job.
+For me tulix does it's job.
 
-bitmark is my second python script ever so the code is ugly and a _lot_ of improvements would be needed to make it good python.
+tulix is my second python script ever so the code is ugly and a _lot_ of improvements would be needed to make it good python.
 
-bitmark is only tested with very few configuration files. So it might be that my reverse engineering does not cover all possible configurations and bitmark might fail to process with yours. If it does, please send me your configuration file so that I can improve the script!
+tulix is only tested with very few configuration files. So it might be that my reverse engineering does not cover all possible configurations and tulix might fail to process with yours. If it does, please send me your configuration file so that I can improve the script!
 
 You are very much invited to improve the script yourself and send a pull request.
