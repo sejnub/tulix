@@ -144,10 +144,8 @@ class Tunnel:
 
 
 class Link:
-    # TODO: Set URL path to the <value> of 'path=<value>' in the comment. 
-    #       Comment example: "Livetracer path=livetracer-ui HTTP" 
     # TODO: See if there is a shorter syntax to set these values
-    def __init__(self, i_host='', i_port=0, i_comment=''):
+    def __init__(self, i_host='', i_port=0, i_path='', i_comment=''):
         if indicates_https(i_comment):
             # TODO: Are these self. correct or do they point to the class
             self.protocol = 'https'
@@ -160,10 +158,21 @@ class Link:
         self.comment = i_comment
 
     def get_html(self):
-        html = '<a href="{protocol}://{host}:{port}">{comment}</a>'.format(
+
+        p1 = re.compile('path=([^ ]+)')
+        m1 = p1.search(self.comment)
+        match_info = pf_match(m1)
+
+        if match_info == NOMATCH:
+            fullpath = ''
+        else:
+            fullpath = '/' + m1.group(1)
+
+        html = '<a href="{protocol}://{host}:{port}{fullpath}">{comment}</a>'.format(
             protocol = self.protocol,
             host     = self.host,
             port     = self.port,
+            fullpath = fullpath,
             comment  = self.comment
         )
         return(html)
@@ -194,7 +203,7 @@ def pf_match(match_object):
 def find_files(pattern, path):
     result = []
     for root, _, files in os.walk(path):
-        print('# ' + root)
+        print('# Checking folder: ' + root)
         for name in files:
             if fnmatch.fnmatch(name, pattern):
                 result.append(os.path.join(root, name))
@@ -233,7 +242,7 @@ def match_level_4(size_1, field_1, size_2, field_2, size_3, field_3, size_4, fie
         tunnel.f_v_dest_port   = int(field_4)
         tunnel.f_s_comment     = size_5
         tunnel.f_v_comment     = field_5
-        print('\np1 Comment:', tunnel.f_v_comment, '\n')
+        print('p1 Comment:', tunnel.f_v_comment)
 
         if (
             tunnel.f_s_listen_if   < 3 or
@@ -377,7 +386,6 @@ def fn_to_tlp(input_fn):
     print()
     print()
     print('################################')
-    print('################################')
     value = 'L0: File read worked'
     print( OK, value)
 
@@ -419,6 +427,7 @@ def fn_to_tlp(input_fn):
 def get_all_tlp(start_folder):
 
     tlp_fns = find_files('*.tlp', start_folder)
+    print('Found the following tlp files (beginning in next line):')
     pprint.pprint(tlp_fns)
 
     list_of_tlps = []
