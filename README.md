@@ -47,3 +47,13 @@ Run ```pyinstaller --onefile bitmark.py```
 ### Get the exe file
 
 The exe is to be found in the ```dist``` folder.
+
+## Code quality and status
+
+For me bitmark does it's job.
+
+bitmark is my second python script ever so the code is ugly and a _lot_ of improvements would be needed to make it good python.
+
+bitmark is only tested with very few configuration files. So it might be that my reverse engineering does not cover all possible configurations and bitmark might fail to process with yours. If it does, please send me your configuration file so that I can improve the script!
+
+You are very much invited to improve the script yourself and send a pull request.
