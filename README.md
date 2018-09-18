@@ -12,7 +12,7 @@ The [Bitvise SSH Client](https://www.bitvise.com/ssh-client) ([downloadlink](htt
 
 ### What does tulix do
 
-tulix starts in the current working directory and recursively searches all folders for ```tlp``` files.
+```tulix``` starts in the current working directory and recursively searches all folders for ```tlp``` files.
 It extracts the tunnel definitions from those files and generates the file ```tulix.html``` which it puts into the current working directory.
 
 ```tulix.html``` contains links to the local forwarded ports and to the remote targets of those ports.
@@ -52,10 +52,10 @@ The exe is to be found in the ```dist``` folder.
 
 ## Code quality and status
 
-For me tulix does it's job.
+For me ```tulix``` does it's job.
 
-tulix is my second python script ever so the code is ugly and a _lot_ of improvements would be needed to make it good python.
+```tulix``` is my second python script ever so the code is ugly and a _lot_ of improvements would be needed to make it good python.
 
-tulix is only tested with very few configuration files. So it might be that my reverse engineering does not cover all possible configurations and tulix might fail to process with yours. If it does, please send me your configuration file so that I can improve the script!
+```tulix``` is only tested with very few configuration files. So it might be that my reverse engineering does not cover all possible configurations and ```tulix``` might fail to process with yours. If it does, please send me your configuration file so that I can improve the script!
 
 You are very much invited to improve the script yourself and send a pull request.
