@@ -151,7 +151,6 @@ class Link:
     # TODO: See if there is a shorter syntax to set these values
     def __init__(self, i_host='', i_port=0, i_path='', i_comment=''):
         if indicates_https(i_comment):
-            # TODO: Are these self. correct or do they point to the class
             self.protocol = 'https'
         elif indicates_http(i_comment):
             self.protocol = 'http'
