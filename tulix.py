@@ -42,7 +42,7 @@ HTML_SKELETON = textwrap.dedent("""\
         <title>{title}</title>
     </head>
 
-    <body>
+    <body style="line-height:1.8">
         {body}
     </body>
 
@@ -94,7 +94,8 @@ class Tlp:
 
     def html_test_tunnels_all(self, local: bool):
         ret_value = ''
-        for tunnel in self.tunnels_all:
+        tunnels_all_sorted = sorted(self.tunnels_all, key = lambda tunnel: tunnel.get_sortkey())
+        for tunnel in tunnels_all_sorted:
             ret_value += tunnel.get_html(local) + '<br/>\n'
         return (ret_value)
 
@@ -116,6 +117,9 @@ class Tunnel:
 
     def __str__(self):
         return(str(self.f_v_listen_port) + ' | ' + self.f_v_comment)
+
+    def get_sortkey(self):
+        return(self.f_v_comment.upper())
 
     def get_html(self, local:bool):
         return(
@@ -225,7 +229,7 @@ def match_level_5_contains_http(tunnel, tlp):
     return(OK, value)
 
 
-def match_level_4(size_1, field_1, size_2, field_2, size_3, field_3, size_4, field_4, size_5, field_5, tlp):
+def match_level_4_plausible_field_sizes(size_1, field_1, size_2, field_2, size_3, field_3, size_4, field_4, size_5, field_5, tlp):
 
     # f_s : field size
     # f_v : field value
@@ -269,7 +273,7 @@ def match_level_4(size_1, field_1, size_2, field_2, size_3, field_3, size_4, fie
     return(OK, value)
 
 
-def match_level_3(m, tlp):
+def match_level_3_filed_content_convertible(m, tlp):
 
     try:
         size_1  = int.from_bytes(m.group(1), 'little')
@@ -306,7 +310,7 @@ def match_level_3(m, tlp):
 
     tlp.matchlevel_3_inner_convertable += 1
 
-    match_level_4(
+    match_level_4_plausible_field_sizes(
         size_1  = size_1,
         field_1 = field_1,
         size_2  = size_2,
@@ -323,7 +327,7 @@ def match_level_3(m, tlp):
     return(OK, value)
 
 
-def match_level_2(matched_group, tlp):
+def match_level_2_inner_regex_matches(matched_group, tlp):
 
     p2 = re.compile(b'(.)([^\00]*)\00\00\00(.)([^\00]*)\00\00\00(.)([^\00]*)\00\00\00(.)([^\00]*)\00\00\00(.)([^\00]*)$')
     m = p2.search(matched_group)
@@ -339,15 +343,15 @@ def match_level_2(matched_group, tlp):
 
     tlp.matchlevel_2_inner += 1
 
-    match_level_3(m = m, tlp = tlp)
+    match_level_3_filed_content_convertible(m = m, tlp = tlp)
 
     return(OK, value)
 
 
-def match_level_1(in_bytes, tlp):
+def match_level_1_outer_regex_matches(in_bytes, tlp):
 
     print()
-    print('################ match_level_1')
+    print('################ match_level_1_outer_regex_matches')
     print("Number of bytes to parse: {n}".format(n=len(in_bytes)))
 
     #p2 = re.compile(b'\01\00\00\00(.*?)((\01\00\00\00)|(\00\00\00\00\00\00\00\00\00))')
@@ -366,9 +370,9 @@ def match_level_1(in_bytes, tlp):
     print( OK, value)
 
     tlp.matchlevel_1_outer += 1
-    match_level_2(m.group(1), tlp)
+    match_level_2_inner_regex_matches(m.group(1), tlp)
 
-    match_level_1(in_bytes[m.span()[1]-5:], tlp)
+    match_level_1_outer_regex_matches(in_bytes[m.span()[1]-5:], tlp)
 
     return(OK, value)
 
@@ -402,7 +406,7 @@ def fn_to_tlp(input_fn):
         print( ERROR, reason)
         return(ERROR, reason)
 
-    match_level_1(in_bytes, tlp)
+    match_level_1_outer_regex_matches(in_bytes, tlp)
 
     print()
     print()
