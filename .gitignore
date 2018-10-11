@@ -3,3 +3,4 @@
 bitmark.spec
 /*.spec
 /src/*.tlp
+/src/tulix.html
