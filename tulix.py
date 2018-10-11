@@ -448,7 +448,7 @@ def get_html(start_folder):
     
     body = ''
     for tlp in tlps:
-        # TODO: make concatenations more efficient
+        # Improvement: make concatenations more efficient
         local_tunnels_html  = tlp.html_test_tunnels_all(local=True)
         remote_tunnels_html = tlp.html_test_tunnels_all(local=False)
 
