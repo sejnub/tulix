@@ -21,7 +21,7 @@ The following rules are applied:
 
 - A link is only generated if the tunnels comment contains the string ```HTTP``` or ```HTTPS```.
 - If the tunnels comment contains the string ```path=somepath``` then the path ```/somepath``` is added to the links URLs.
-- If the tunnels comment contains the string ```user:path=someuser:somepassword``` then the string ```someuser:somepassword```  is inserted into the links url as basic authentication information in the form ```<protocol>://someuser:somepassword@<host>/somepath```.
+- If the tunnels comment contains the string ```user:pass=someuser:somepassword``` then the string ```someuser:somepassword```  is inserted into the links url as basic authentication information in the form ```<protocol>://someuser:somepassword@<host>/somepath```.
 
 ## Run
 
