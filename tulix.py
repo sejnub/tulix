@@ -13,6 +13,8 @@ import textwrap
 ## constants ##
 ###############
 
+TULIX_VERSION = 2
+
 START_FOLDER  = 'D:/hb-privat/reps/bitvise_to_bookmark'
 START_FOLDER  = 'C:/hb-regime/3_configuration/remote-access'
 START_FOLDER  = '.'
@@ -164,19 +166,28 @@ class Link:
 
         p1 = re.compile('path=([^ ]+)')
         m1 = p1.search(self.comment)
-        match_info = pf_match(m1)
-
-        if match_info == NOMATCH:
+        match_info1 = pf_match(m1)
+        if match_info1 == NOMATCH:
             fullpath = ''
         else:
             fullpath = '/' + m1.group(1)
 
-        html = '<a href="{protocol}://{host}:{port}{fullpath}">{comment}</a>'.format(
-            protocol = self.protocol,
-            host     = self.host,
-            port     = self.port,
-            fullpath = fullpath,
-            comment  = self.comment
+        p2 = re.compile('user:pass=([^ ]+)')
+        m2 = p2.search(self.comment)
+        match_info2 = pf_match(m2)
+        if match_info2 == NOMATCH:
+            user_pass = ''
+        else:
+            user_pass = m2.group(1) + '@'
+
+
+        html = '<a href="{protocol}://{user_pass}{host}:{port}{fullpath}">{comment}</a>'.format(
+            protocol  = self.protocol,
+            user_pass = user_pass,
+            host      = self.host,
+            port      = self.port,
+            fullpath  = fullpath,
+            comment   = self.comment
         )
         return(html)
 
@@ -386,9 +397,6 @@ def fn_to_tlp(input_fn):
         print( ERROR, reason)
         return(ERROR, reason)
 
-    print()
-    print()
-    print('################################')
     value = 'L0: File read worked'
     print( OK, value)
 
@@ -492,8 +500,12 @@ def all():
 ##########
 
 if __name__ == '__main__':
-    print('p2')
+    print()
+    print('################################')
+    print("This is tulix Version " + str(TULIX_VERSION))
     all()
+    print("This was tulix Version " + str(TULIX_VERSION))
+    print()
 
 
 # eof
