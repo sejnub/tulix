@@ -2,5 +2,5 @@
 /__pycache__
 bitmark.spec
 /*.spec
-/src/*.tlp
+#/src/*.tlp
 /src/tulix.html
